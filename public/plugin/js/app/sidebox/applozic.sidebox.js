@@ -1657,7 +1657,6 @@ window.onload = function() {
                     userPxy.userTypeId = USER_TYPE_ID;
                 }
                 userPxy.enableEncryption = true;
-                userPxy.appVersionCode = 111;
                 userPxy.authenticationTypeId = MCK_AUTHENTICATION_TYPE_ID;
                 AUTH_CODE = '';
                 window.Applozic.ALApiService.AUTH_TOKEN = null;

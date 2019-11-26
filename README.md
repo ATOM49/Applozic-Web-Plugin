@@ -394,7 +394,7 @@ Applozic-Web-Plugin
                 |-- call
                     |-- mck-ringtone-service.js       - to play ringtone            
                     
-                |-- applozic.aes.js                   - external library for Encryption
+                |-- crypto-js.4.0.min.js              - external library for Encryption
                 |-- applozic.emojis.min.js            - external library for emojis
                 |-- stomp.2.3.3.min.js                - external library for StompJs
                 |-- applozic.widget.min.js            - external library for widgets

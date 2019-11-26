@@ -4,6 +4,7 @@
         var ALApiService = {};
         var MCK_APP_ID = "";
         var mckUtils = new MckUtils();
+        ALApiService.DEFAULT_ENCRYPTED_APP_VERSION = 112;
         var MCK_BASE_URL = 'https://apps.applozic.com';
         var S3_MIGRATION_URL = 'applozic.appspot.com';
         var MCK_FILE_URL = 'https://applozic.appspot.com'
@@ -93,6 +94,7 @@
             MCK_APP_ID = options.data.alUser.applicationId;
             MCK_BASE_URL = options.data.baseUrl ? options.data.baseUrl : "https://apps.applozic.com";
             MCK_CUSTOM_UPLOAD_SETTINGS = options.data.alUser.fileupload;
+            options.data.alUser.appVersionCode = options.data.alUser.appVersionCode || ALApiService.DEFAULT_ENCRYPTED_APP_VERSION;
             ALApiService.ajax({
                 url: MCK_BASE_URL + INITIALIZE_APP_URL,
                 skipEncryption: true,
@@ -111,6 +113,7 @@
                     ALApiService.AUTH_TOKEN = response.authToken;
                     ALApiService.setAjaxHeaders(AUTH_CODE, MCK_APP_ID, response.deviceKey, options.data.alUser.password, options.data.alUser.appModuleName);
                     ALApiService.setEncryptionKeys(response.encryptionKey, response.userEncryptionKey);
+                    response.appVersionCode = ALApiService.DEFAULT_ENCRYPTED_APP_VERSION;
                     if (options.success) {
                         options.success(response);
                     }
