@@ -39,14 +39,14 @@ function MckGroupUtils() {
     }
   };
 
-  _this.initGroupTab = function (params) {
+  _this.initGroupTab = function (params,callback) {
     if (typeof params === "object") {
       var users = params.users;
       if (typeof users === 'undefined' || users.length < 1) {
         return 'Users List Required';
       }
-      if (users.length > MCK_GROUPMAXSIZE) {
-        return 'Users limit exceeds ' + MCK_GROUPMAXSIZE + '. Max number of users allowed is ' + MCK_GROUPMAXSIZE + '.';
+      if (users.length > MCK_GROUP_MAX_SIZE) {
+        return 'Users limit exceeds ' + MCK_GROUP_MAX_SIZE + '. Max number of users allowed is ' + MCK_GROUP_MAX_SIZE + '.';
       }
       if (!params.groupName) {
         return 'Group name required';
@@ -54,10 +54,10 @@ function MckGroupUtils() {
       if (typeof params.type === 'undefined') {
         return 'Group type required';
       }
-      if (GROUP_TYPE_MAP.indexOf(params.type) === -1) {
+      if (mckGroupUtils.GROUP_TYPE_MAP.indexOf(params.type) === -1) {
         return 'Invalid group type';
       }
-      mckMessageService.getGroup(params);
+      typeof callback == "function" && callback(params);
       return 'success';
     } else {
       return 'Unsupported format. Please check format';
@@ -138,6 +138,7 @@ function MckGroupService() {
   var IS_MCK_VISITOR;
   var MCK_USER_ID;
   var MCK_OPEN_GROUP_SETTINGS;
+  var MCK_GROUP_MAX_SIZE;
   var MCK_LAST_SEEN_AT_MAP = [];
   var MCK_BLOCKED_TO_MAP = [];
   var GROUP_LIST_URL = "/rest/ws/group/list";
@@ -186,7 +187,7 @@ function MckGroupService() {
     }
   };
 
-  _this.createGroup = function (params) {
+  _this.createGroup = function (params,callback) {
     if (typeof params === 'object') {
       if (typeof params.callback === 'function') {
         var users = params.users;
@@ -197,10 +198,10 @@ function MckGroupService() {
           });
           return;
         }
-        if (users.length > MCK_GROUPMAXSIZE) {
+        if (users.length > MCK_GROUP_MAX_SIZE) {
           params.callback({
             'status': 'error',
-            'errorMessage': "Users limit exceeds " + MCK_GROUPMAXSIZE + ". Max number of users allowed is " + MCK_GROUPMAXSIZE + "."
+            'errorMessage': "Users limit exceeds " + MCK_GROUP_MAX_SIZE + ". Max number of users allowed is " + MCK_GROUP_MAX_SIZE + "."
           });
           return;
         }
@@ -218,14 +219,14 @@ function MckGroupService() {
           });
           return;
         }
-        if (GROUP_TYPE_MAP.indexOf(params.type) === -1) {
+        if (mckGroupUtils.GROUP_TYPE_MAP.indexOf(params.type) === -1) {
           params.callback({
             'status': 'error',
             'errorMessage': 'Invalid group type'
           });
           return;
         }
-        mckMessageService.getGroup(params);
+        typeof callback == "function" && callback(params);
         return 'success';
       } else {
         return 'Callback function required';
@@ -239,6 +240,7 @@ function MckGroupService() {
     IS_MCK_VISITOR = options.visitor;
     MCK_USER_ID = (IS_MCK_VISITOR) ? 'guest' : (options.userId && options.userId.toString().trim());
     MCK_OPEN_GROUP_SETTINGS = options.openGroupSettings;
+    MCK_GROUP_MAX_SIZE = options.maxGroupSize;
   };
 
   _this.getGroupList = function (params) {
