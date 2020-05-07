@@ -96,20 +96,20 @@ window.onload = function() {
                         return oInstance.sendGroupMessage(params);
                         break;
                     case 'createGroup':
-                        return mckGroupService.createGroup(params);
+                        return oInstance.createGroup(params);
                         break;
                     case 'loadBroadcastTab':
                         params.groupName = (params.groupName) ? params.groupName : 'Broadcast';
                         params.type = 5;
-                        return mckGroupUtils.initGroupTab(params);
+                        return oInstance.initGroupTab(params);
                         break;
                     case 'initBroadcastTab':
                         params.groupName = (params.groupName) ? params.groupName : 'Broadcast';
                         params.type = 5;
-                        return mckGroupUtils.initGroupTab(params);
+                        return oInstance.initGroupTab(params);
                         break;
                     case 'initGroupTab':
-                        return mckGroupUtils.initGroupTab(params);
+                        return oInstance.initGroupTab(params);
                         break;
                     case 'loadGroupTab':
                         return oInstance.loadGroupTab(params);
@@ -1549,6 +1549,16 @@ window.onload = function() {
                 return 'Unsupported format. Please check format';
             }
         };
+        _this.createGroup = function(params){
+            mckGroupService.createGroup(params, function(params){
+                mckMessageService.getGroup(params);
+            });
+        }
+        _this.initGroupTab = function(params){
+            mckGroupService.initGroupTab(params, function(params){
+                mckMessageService.getGroup(params);
+            });
+        }
         _this.getTotalUnreadCount = function() {
             return MCK_TOTAL_UNREAD_COUNT;
         };
@@ -3183,19 +3193,16 @@ window.onload = function() {
                 }
             };
 						_this.dropInUnreadCountUpdate =function(tabId,isgroup,isClientGroupId){
-							var htmlId
-							if(!isgroup){
-							 htmlId = mckContactUtils.formatContactId(tabId);
-						 }else{
-							 htmlId = tabId;
-						 }
-
+                            var htmlId
+                            if(typeof(tabId) != undefined){
+                                htmlId = mckContactUtils.formatContactId(tabId)
 							var prefix = isgroup ?".li-group-" : ".li-user-" ;
 							if(isgroup && isClientGroupId){
 								prefix =".li-clientgroupid-"
 							}
 							$applozic(prefix+ htmlId + " .mck-unread-count-text").html(0);
 							$applozic(prefix + htmlId + " .mck-unread-count-box").removeClass('vis').addClass('n-vis');
+                            }
 						}
 
             _this.loadMessageList = function(params, callback) {
@@ -5115,7 +5122,7 @@ window.onload = function() {
                 }
                 var contHtmlExpr = (isGroupTab) ? 'group-' + contact.htmlId : 'user-' + contact.htmlId;
 								if((isGroupTab)){
-									clientGroupIdExpr = 'li-clientgroupid-'+contact.clientGroupId;
+									clientGroupIdExpr = 'li-clientgroupid-'+clientGroupId;
 								}
 
                 var contactList = [{

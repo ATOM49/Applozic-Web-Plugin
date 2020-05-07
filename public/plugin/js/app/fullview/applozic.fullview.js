@@ -85,17 +85,17 @@ var MCK_CLIENT_GROUP_MAP = [];
                     case 'sendGroupMessage':
                         return oInstance.sendGroupMessage(params);
                     case 'createGroup':
-                        return mckGroupService.createGroup(params);
+                        return oInstance.createGroup(params);
                     case 'loadBroadcastTab':
                         params.groupName = (params.groupName) ? params.groupName : 'Broadcast';
                         params.type = 5;
-                        return mckGroupUtils.initGroupTab(params);
+                        return oInstance.initGroupTab(params);
                     case 'initBroadcastTab':
                         params.groupName = (params.groupName) ? params.groupName : 'Broadcast';
                         params.type = 5;
-                        return mckGroupUtils.initGroupTab(params);
+                        return oInstance.initGroupTab(params);
                     case 'initGroupTab':
-                        return mckGroupUtils.initGroupTab(params);
+                        return oInstance.initGroupTab(params);
                     case 'loadGroupTab':
                         return oInstance.loadGroupTab(params);
                     case 'loadGroupTabByClientGroupId':
@@ -924,6 +924,16 @@ var MCK_CLIENT_GROUP_MAP = [];
                 return 'Unsupported format. Please check format';
             }
         };
+        _this.createGroup = function(params){
+            mckGroupService.createGroup(params, function(params){
+                mckMessageService.getGroup(params);
+            });
+        }
+        _this.initGroupTab = function(params){
+            mckGroupService.initGroupTab(params, function(params){
+                mckMessageService.getGroup(params);
+            });
+        }
         _this.getTotalUnreadCount = function() {
             return MCK_TOTAL_UNREAD_COUNT;
         };
