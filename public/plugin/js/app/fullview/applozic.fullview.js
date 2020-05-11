@@ -5833,7 +5833,7 @@ var MCK_CLIENT_GROUP_MAP = [];
                 }
             };
             _this.loadContacts = function() {
-               var url = CONTACT_LIST_URL + '?startIndex=0&pageSize=50&orderBy=1';
+               var url = CONTACT_LIST_URL + '?startIndex=0&pageSize=50&orderBy=1&role=USER';
                mckContactService.ajaxcallForContacts(url,false,  function(){});
              };
               _this.ajaxcallForContacts =  function (url,append,callback) {
