@@ -7762,7 +7762,7 @@ var MCK_CLIENT_GROUP_MAP = [];
             var DISCONNECTED = 'disconnected';
             var USER_ENCRYPTION_KEY;
             _this.init = function(data) {
-                if (typeof data !== "undefined" && ( data.encryptionKey || data.appVersionCode === window.Applozic.ALApiService.DEFAULT_ENCRYPTED_APP_VERSION)) {
+                if (typeof data !== "undefined" && ( data.encryptionKey || parseInt(data.appVersionCode) >= window.Applozic.ALApiService.DEFAULT_ENCRYPTED_APP_VERSION)) {
                     USER_ENCRYPTION_KEY = data.userEncryptionKey;
                 }
 

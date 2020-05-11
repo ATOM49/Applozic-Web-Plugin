@@ -56,7 +56,7 @@
                 ALSocket.MCK_TOKEN = data.token;
                 ALSocket.APP_VERSION_CODE = data.appVersionCode;
                 ALSocket.USER_DEVICE_KEY = data.deviceKey;
-                if (data.encryptionKey || data.appVersionCode === window.Applozic.ALApiService.DEFAULT_ENCRYPTED_APP_VERSION) {
+                if (data.encryptionKey || parseInt(data.appVersionCode) >= window.Applozic.ALApiService.DEFAULT_ENCRYPTED_APP_VERSION) {
                     ALSocket.USER_ENCRYPTION_KEY = data.userEncryptionKey;
                 }
                 MCK_WEBSOCKET_URL = data.websocketUrl;
