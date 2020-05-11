@@ -178,12 +178,11 @@ function MckUtils() {
         if (!encryptionKey) {
             return data;
         }
-        var keyHex = CryptoJS.enc.Utf8.parse(encryptionKey);
-        var encrypted = CryptoJS.AES.encrypt(data, keyHex, {
+        var key = CryptoJS.enc.Utf8.parse(encryptionKey);
+        var encrypted = CryptoJS.AES.encrypt(data, key, {
             mode: CryptoJS.mode.ECB,
             padding: CryptoJS.pad.ZeroPadding
         });
-        console.log(_this.decrypt(encrypted.toString(), encryptionKey));
         return encrypted.toString();
     },
 
@@ -191,12 +190,12 @@ function MckUtils() {
         if (!encryptionKey) {
             return data;
         }
-        var keyHex = CryptoJS.enc.Utf8.parse(encryptionKey);
+        var key = CryptoJS.enc.Utf8.parse(encryptionKey);
         // direct decrypt cipherText
         var cipherParams = CryptoJS.lib.CipherParams.create({
             ciphertext: CryptoJS.enc.Base64.parse(data)
         });
-        var decrypted = CryptoJS.AES.decrypt(cipherParams, keyHex, {
+        var decrypted = CryptoJS.AES.decrypt(cipherParams, key, {
             mode: CryptoJS.mode.ECB,
             padding: CryptoJS.pad.ZeroPadding
         });
