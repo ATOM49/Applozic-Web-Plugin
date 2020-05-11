@@ -1667,7 +1667,6 @@ window.onload = function() {
                     userPxy.userTypeId = USER_TYPE_ID;
                 }
                 userPxy.enableEncryption = true;
-                userPxy.appVersionCode = 111;
                 userPxy.authenticationTypeId = MCK_AUTHENTICATION_TYPE_ID;
                 AUTH_CODE = '';
                 window.Applozic.ALApiService.AUTH_TOKEN = null;
@@ -1848,7 +1847,7 @@ window.onload = function() {
 				window.Applozic.ALApiService.setAjaxHeaders(AUTH_CODE,MCK_APP_ID,USER_DEVICE_KEY,MCK_ACCESS_TOKEN,MCK_APP_MODULE_NAME);
                 window.Applozic.ALApiService.setEncryptionKeys(data.encryptionKey, data.userEncryptionKey);
 
-                if (!EMOJI_LIBRARY || data.encryptionKey) { 
+                if (!EMOJI_LIBRARY) { 
                     // EMOJI_LIBRARY = false ->hide emoticon from chat widget
                     document.getElementById('mck-textbox-container').getElementsByTagName('div')[0].setAttribute('class', 'n-vis');
                     document.getElementById('mck-text-box').classList.add('mck-text-box-width-increase');
