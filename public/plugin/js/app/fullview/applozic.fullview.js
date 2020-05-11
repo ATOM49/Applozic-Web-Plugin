@@ -1240,7 +1240,7 @@ var MCK_CLIENT_GROUP_MAP = [];
                 window.Applozic.ALApiService.setAjaxHeaders(AUTH_CODE,MCK_APP_ID,USER_DEVICE_KEY,MCK_ACCESS_TOKEN,MCK_APP_MODULE_NAME);
                 window.Applozic.ALApiService.setEncryptionKeys(data.encryptionKey, data.userEncryptionKey);
 
-                if (!EMOJI_LIBRARY || data.encryptionKey) { 
+                if (!EMOJI_LIBRARY) { 
                     // EMOJI_LIBRARY = false ->hide emoticon from chat widget
                     document.getElementById('mck-btn-smiley').setAttribute('class', 'n-vis');
                     document.getElementById('mck-text-box').classList.add('mck-text-box-width-increase');
