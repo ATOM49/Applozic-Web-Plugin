@@ -3191,18 +3191,18 @@ window.onload = function() {
                     });
                 }
             };
-						_this.dropInUnreadCountUpdate =function(tabId,isgroup,isClientGroupId){
+			_this.dropInUnreadCountUpdate =function(tabId,isgroup,isClientGroupId){
                             var htmlId
                             if(typeof(tabId) != undefined){
-                                htmlId = mckContactUtils.formatContactId(tabId)
-							var prefix = isgroup ?".li-group-" : ".li-user-" ;
-							if(isgroup && isClientGroupId){
-								prefix =".li-clientgroupid-"
-							}
-							$applozic(prefix+ htmlId + " .mck-unread-count-text").html(0);
-							$applozic(prefix + htmlId + " .mck-unread-count-box").removeClass('vis').addClass('n-vis');
+                                htmlId = mckContactUtils.formatContactId(''+ tabId);
+				var prefix = isgroup ?".li-group-" : ".li-user-" ;
+					if(isgroup && isClientGroupId){
+						prefix =".li-clientgroupid-"
+					}
+				$applozic(prefix+ htmlId + " .mck-unread-count-text").html(0);
+				$applozic(prefix + htmlId + " .mck-unread-count-box").removeClass('vis').addClass('n-vis');
                             }
-						}
+			}
 
             _this.loadMessageList = function(params, callback) {
                 var individual = false;
