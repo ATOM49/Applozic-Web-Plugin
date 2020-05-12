@@ -8020,7 +8020,7 @@ var MCK_CLIENT_GROUP_MAP = [];
             _this.onStompMessage = function (obj) {
                 var response;
                 if (subscriber != null && subscriber.id === obj.headers.subscription) {
-                    response = obj;
+                    response = obj.body;
                 } else if (encryptedSubscriber != null && encryptedSubscriber.id === obj.headers.subscription) {
                     response = mckUtils.decrypt(obj.body, USER_ENCRYPTION_KEY);
                 }
