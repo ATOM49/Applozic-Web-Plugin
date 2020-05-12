@@ -3194,7 +3194,7 @@ window.onload = function() {
 			_this.dropInUnreadCountUpdate =function(tabId,isgroup,isClientGroupId){
                             var htmlId
                             if(typeof(tabId) != undefined){
-                                htmlId = mckContactUtils.formatContactId(' '+ tabId);
+                                htmlId = mckContactUtils.formatContactId(''+ tabId);
 				var prefix = isgroup ?".li-group-" : ".li-user-" ;
 					if(isgroup && isClientGroupId){
 						prefix =".li-clientgroupid-"
