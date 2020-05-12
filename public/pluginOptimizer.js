@@ -13,6 +13,7 @@ const generateBuildFiles = () => {
         // To not compress and only concat replace terser -> noCompress
         input: [
             './public/plugin/js/stomp.2.3.3.min.js',
+            './public/plugin/js/crypto-js.4.0.min.js',
             './public/plugin/js/app/applozic.common.js',
             './public/plugin/js/app/modules/applozic.chat.js',
             './public/plugin/js/app/modules/storage/applozic.storage.js',

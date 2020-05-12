@@ -229,7 +229,7 @@ function MckUtils() {
         } catch (e) {
             return false;
         }
-        return true;
+        return isNaN(str);
     };
     /*
     - This is alternative for Jquery deep extend. Refer this link for help https://api.jquery.com/jquery.extend/

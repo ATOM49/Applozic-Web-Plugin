@@ -7742,6 +7742,7 @@ var MCK_CLIENT_GROUP_MAP = [];
             var _this = this;
             var events = $this.events;
             var subscriber = null;
+            var encryptedSubscriber = null;
             var stompClient = null;
             var TYPING_TAB_ID = '';
             var typingSubscriber = null;
@@ -7875,11 +7876,10 @@ var MCK_CLIENT_GROUP_MAP = [];
             };
             _this.unsubscibeToNotification = function() {
                 if (stompClient && stompClient.connected) {
-                    if (subscriber) {
-                        subscriber.unsubscribe();
-                    }
+                    subscriber && subscriber.unsubscribe();
+                    encryptedSubscriber && encryptedSubscriber.unsubscribe();
                 }
-                subscriber = null;
+                subscriber, encryptedSubscriber = null;
             };
             _this.subscibeToTypingChannel = function(tabId, isGroup) {
                 var subscribeId = (isGroup) ? tabId : MCK_USER_ID;
@@ -7998,24 +7998,33 @@ var MCK_CLIENT_GROUP_MAP = [];
                     }, MCK_TOKEN + "," + USER_DEVICE_KEY + "," + status);
                 }
             };
-            _this.onConnect = function() {
-                var topic = "/topic/" + (USER_ENCRYPTION_KEY ? "encr-":"") + MCK_TOKEN;
+            _this.onConnect = function () {
                 if (stompClient.connected) {
-                    if (subscriber) {
-                        _this.unsubscibeToNotification();
-                    }
-                    subscriber = stompClient.subscribe(topic, _this.onMessage);
-                    _this.sendStatus(1);
-                    _this.checkConnected(true);
-                    socketStatus = CONNECTED;
+                    (subscriber || encryptedSubscriber) && _this.unsubscibeToNotification();
+                    _this.handleOnConnect();
                 } else {
-                    setTimeout(function() {
-                        subscriber = stompClient.subscribe(topic, _this.onMessage);
-                        _this.sendStatus(1);
-                        _this.checkConnected(true);
+                    setTimeout(function () {
+                        _this.handleOnConnect();
                     }, 5000);
                 }
                 events.onConnect();
+            };
+            _this.handleOnConnect = function () {
+                var topic = "/topic/" + MCK_TOKEN;
+                var encryptedTopic = "/topic/encr-" + MCK_TOKEN;
+                subscriber = stompClient.subscribe(topic, _this.onStompMessage);
+                USER_ENCRYPTION_KEY && (encryptedSubscriber = stompClient.subscribe(encryptedTopic, _this.onStompMessage));
+                _this.sendStatus(1);
+                _this.checkConnected(true);
+            };
+            _this.onStompMessage = function (obj) {
+                var response;
+                if (subscriber != null && subscriber.id === obj.headers.subscription) {
+                    response = obj;
+                } else if (encryptedSubscriber != null && encryptedSubscriber.id === obj.headers.subscription) {
+                    response = mckUtils.decrypt(obj.body, USER_ENCRYPTION_KEY);
+                }
+                _this.onMessage(response);
             };
             _this.onOpenGroupMessage = function(obj) {
                 if (openGroupSubscriber.indexOf(obj.headers.subscription) !== -1) {
@@ -8088,11 +8097,9 @@ var MCK_CLIENT_GROUP_MAP = [];
                 }
             };
             _this.onMessage = function(obj) {
-                if (subscriber != null && subscriber.id === obj.headers.subscription) {
+                if (mckUtils.isJsonString(obj)) {
                     $mck_message_inner = mckMessageLayout.getMckMessageInner();
-
-                    var res = mckUtils.decrypt(obj.body, USER_ENCRYPTION_KEY);
-                    var resp = $applozic.parseJSON(res);
+                    var resp = JSON.parse(obj);
                     var messageType = resp.type;
                     typeof resp.message == "object" && $mck_message_inner.data('last-message-received-time', resp.message.createdAtTime);
                     if (messageType === "APPLOZIC_04" || messageType === "MESSAGE_DELIVERED") {
