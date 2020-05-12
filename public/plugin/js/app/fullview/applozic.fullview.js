@@ -7879,7 +7879,7 @@ var MCK_CLIENT_GROUP_MAP = [];
                     subscriber && subscriber.unsubscribe();
                     encryptedSubscriber && encryptedSubscriber.unsubscribe();
                 }
-                subscriber, encryptedSubscriber = null;
+                subscriber = encryptedSubscriber = null;
             };
             _this.subscibeToTypingChannel = function(tabId, isGroup) {
                 var subscribeId = (isGroup) ? tabId : MCK_USER_ID;

@@ -158,7 +158,7 @@
                 subscriber && subscriber.unsubscribe();
                 encryptedSubscriber && encryptedSubscriber.unsubscribe();
             }
-            subscriber, encryptedSubscriber = null;
+            subscriber = encryptedSubscriber = null;
         };
         ALSocket.subscibeToTypingChannel = function(subscribeId) {
             if (ALSocket.stompClient && ALSocket.stompClient.connected) {
