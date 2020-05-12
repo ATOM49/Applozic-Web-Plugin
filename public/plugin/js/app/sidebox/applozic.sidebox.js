@@ -5305,7 +5305,7 @@ window.onload = function() {
 						_this.loadContactsForContactList = function (data) {
 								var startIndex =data.startIndex?data.startIndex:'0';
 								var pageSize = data.pageSize?data.pageSize:'50';
-								var url = MCK_BASE_URL + '/rest/ws/user/filter?startIndex='+startIndex+'&pageSize='+pageSize+'&orderBy=1';
+								var url = MCK_BASE_URL + '/rest/ws/user/filter?startIndex='+startIndex+'&pageSize='+pageSize+'&orderBy=1'+'&role=USER';
 								mckUtils.ajax({
 											url: url,
 											type: 'get',
@@ -6011,7 +6011,7 @@ window.onload = function() {
                 });
         };
 				_this.loadContacts = function() {
-					 var url = CONTACT_LIST_URL + '?startIndex=0&pageSize=50&orderBy=1';
+					 var url = CONTACT_LIST_URL + '?startIndex=0&pageSize=50&orderBy=1&role=USER';
 					 mckContactService.ajaxcallForContacts(url,false,  mckMessageService.loadMessageList({}));
 				 };
 				_this.ajaxcallForContacts =  function (url,append,callback) {
