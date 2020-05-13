@@ -5,6 +5,7 @@
         var MCK_APP_ID;
         ALSocket.events = {};
         var subscriber = null;
+        var encryptedSubscriber = null;
         ALSocket.stompClient = null;
         var TYPING_TAB_ID = '';
         ALSocket.typingSubscriber = null;
@@ -154,11 +155,10 @@
         };
         ALSocket.unsubscibeToNotification = function() {
             if (ALSocket.stompClient && ALSocket.stompClient.connected) {
-                if (subscriber) {
-                    subscriber.unsubscribe();
-                }
+                subscriber && subscriber.unsubscribe();
+                encryptedSubscriber && encryptedSubscriber.unsubscribe();
             }
-            subscriber = null;
+            subscriber = encryptedSubscriber = null;
         };
         ALSocket.subscibeToTypingChannel = function(subscribeId) {
             if (ALSocket.stompClient && ALSocket.stompClient.connected) {
@@ -248,36 +248,44 @@
             }
         };
         ALSocket.onConnect = function() {
-            var topic = "/topic/" + (ALSocket.USER_ENCRYPTION_KEY ? "encr-":"") + ALSocket.MCK_TOKEN;
             isReconnectAvailable = true;
             if (ALSocket.stompClient.connected) {
-                if (subscriber) {
-                    ALSocket.unsubscibeToNotification();
-                }
-                subscriber = ALSocket.stompClient.subscribe(topic, ALSocket.onMessage);
-                ALSocket.sendStatus(1);
-                ALSocket.checkConnected(true);
+                (subscriber || encryptedSubscriber) && ALSocket.unsubscibeToNotification();
+                ALSocket.handleOnConnect();
             } else {
                 setTimeout(function() {
-                    subscriber = ALSocket.stompClient.subscribe(topic, ALSocket.onMessage);
-                    ALSocket.sendStatus(1);
-                    ALSocket.checkConnected(true);
+                    ALSocket.handleOnConnect();
                 }, 5000);
             }
             if (typeof ALSocket.events.onConnect === "function") {
                 ALSocket.events.onConnect();
             }
         };
-        ALSocket.onOpenGroupMessage = function(obj) {
+        ALSocket.handleOnConnect = function () {
+            var topic = "/topic/" + ALSocket.MCK_TOKEN;
+            var encryptedTopic = "/topic/encr-" + ALSocket.MCK_TOKEN;
+            subscriber = ALSocket.stompClient.subscribe(topic, ALSocket.onStompMessage);
+            ALSocket.USER_ENCRYPTION_KEY && (encryptedSubscriber = ALSocket.stompClient.subscribe(encryptedTopic, ALSocket.onStompMessage));
+            ALSocket.sendStatus(1);
+            ALSocket.checkConnected(true);
+        };
+        ALSocket.onOpenGroupMessage = function (obj) {
             if (typeof ALSocket.events.onOpenGroupMessage === "function") {
                 ALSocket.events.onOpenGroupMessage(obj);
             }
         };
-        ALSocket.onMessage = function (obj) {
+        ALSocket.onStompMessage = function (obj) {
+            var response;
             if (subscriber != null && subscriber.id === obj.headers.subscription) {
-                var res = mckUtils.decrypt(obj.body, ALSocket.USER_ENCRYPTION_KEY);
-
-                var resp = JSON.parse(res);
+                response = obj.body;
+            } else if (encryptedSubscriber != null && encryptedSubscriber.id === obj.headers.subscription) {
+                response = mckUtils.decrypt(obj.body, ALSocket.USER_ENCRYPTION_KEY);
+            }
+            ALSocket.onMessage(response);
+        };
+        ALSocket.onMessage = function (obj) {
+            if (mckUtils.isJsonString(obj)) {
+                var resp = JSON.parse(obj);
                 var messageType = resp.type;
                 if (typeof ALSocket.events.onMessage === "function") {
                     ALSocket.events.onMessage(resp);
@@ -290,8 +298,7 @@
                     ALSocket.events.onMessageDeleted(resp);
                 } else if (messageType === 'APPLOZIC_27') {
                     ALSocket.events.onConversationDeleted(resp);
-                }
-                else if (messageType === 'APPLOZIC_11') {
+                } else if (messageType === 'APPLOZIC_11') {
                     ALSocket.events.onUserConnect(resp.message);
                 } else if (messageType === 'APPLOZIC_12') {
                     var userId = resp.message.split(",")[0];
@@ -339,11 +346,10 @@
                             'message': messageFeed
                         });
                     }
-
                 }
             }
         };
-
+                       
         return ALSocket;
     }
 
