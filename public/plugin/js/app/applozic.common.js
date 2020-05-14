@@ -199,7 +199,7 @@ function MckUtils() {
             mode: CryptoJS.mode.ECB,
             padding: CryptoJS.pad.ZeroPadding
         });
-        let response = decrypted.toString(CryptoJS.enc.Utf8);
+        var response = decrypted.toString(CryptoJS.enc.Utf8);
         return response.replace(/\\u0000/g, '').replace(/^\s*|\s*[\x00-\x10]*$/g, '');
     },
 
