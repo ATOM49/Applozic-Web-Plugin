@@ -85,17 +85,17 @@ var MCK_CLIENT_GROUP_MAP = [];
                     case 'sendGroupMessage':
                         return oInstance.sendGroupMessage(params);
                     case 'createGroup':
-                        return mckGroupService.createGroup(params);
+                        return oInstance.createGroup(params);
                     case 'loadBroadcastTab':
                         params.groupName = (params.groupName) ? params.groupName : 'Broadcast';
                         params.type = 5;
-                        return mckGroupUtils.initGroupTab(params);
+                        return oInstance.initGroupTab(params);
                     case 'initBroadcastTab':
                         params.groupName = (params.groupName) ? params.groupName : 'Broadcast';
                         params.type = 5;
-                        return mckGroupUtils.initGroupTab(params);
+                        return oInstance.initGroupTab(params);
                     case 'initGroupTab':
-                        return mckGroupUtils.initGroupTab(params);
+                        return oInstance.initGroupTab(params);
                     case 'loadGroupTab':
                         return oInstance.loadGroupTab(params);
                     case 'loadGroupTabByClientGroupId':
@@ -924,6 +924,16 @@ var MCK_CLIENT_GROUP_MAP = [];
                 return 'Unsupported format. Please check format';
             }
         };
+        _this.createGroup = function(params){
+            mckGroupService.createGroup(params, function(params){
+                mckMessageService.getGroup(params);
+            });
+        }
+        _this.initGroupTab = function(params){
+            mckGroupService.initGroupTab(params, function(params){
+                mckMessageService.getGroup(params);
+            });
+        }
         _this.getTotalUnreadCount = function() {
             return MCK_TOTAL_UNREAD_COUNT;
         };
@@ -1029,7 +1039,6 @@ var MCK_CLIENT_GROUP_MAP = [];
                     userPxy.userTypeId = USER_TYPE_ID;
                 }
                 userPxy.enableEncryption = true;
-                userPxy.appVersionCode = 111;
                 userPxy.authenticationTypeId = MCK_AUTHENTICATION_TYPE_ID;
                 AUTH_CODE = '';
                 window.Applozic.ALApiService.AUTH_TOKEN = null;
@@ -1241,7 +1250,7 @@ var MCK_CLIENT_GROUP_MAP = [];
                 window.Applozic.ALApiService.setAjaxHeaders(AUTH_CODE,MCK_APP_ID,USER_DEVICE_KEY,MCK_ACCESS_TOKEN,MCK_APP_MODULE_NAME);
                 window.Applozic.ALApiService.setEncryptionKeys(data.encryptionKey, data.userEncryptionKey);
 
-                if (!EMOJI_LIBRARY || data.encryptionKey) { 
+                if (!EMOJI_LIBRARY) { 
                     // EMOJI_LIBRARY = false ->hide emoticon from chat widget
                     document.getElementById('mck-btn-smiley').setAttribute('class', 'n-vis');
                     document.getElementById('mck-text-box').classList.add('mck-text-box-width-increase');
@@ -5823,7 +5832,7 @@ var MCK_CLIENT_GROUP_MAP = [];
                 }
             };
             _this.loadContacts = function() {
-               var url = CONTACT_LIST_URL + '?startIndex=0&pageSize=50&orderBy=1';
+               var url = CONTACT_LIST_URL + '?startIndex=0&pageSize=50&orderBy=1&role=USER';
                mckContactService.ajaxcallForContacts(url,false,  function(){});
              };
               _this.ajaxcallForContacts =  function (url,append,callback) {
@@ -7733,6 +7742,7 @@ var MCK_CLIENT_GROUP_MAP = [];
             var _this = this;
             var events = $this.events;
             var subscriber = null;
+            var encryptedSubscriber = null;
             var stompClient = null;
             var TYPING_TAB_ID = '';
             var typingSubscriber = null;
@@ -7753,7 +7763,7 @@ var MCK_CLIENT_GROUP_MAP = [];
             var DISCONNECTED = 'disconnected';
             var USER_ENCRYPTION_KEY;
             _this.init = function(data) {
-                if (typeof data !== "undefined" && data.encryptionKey) {
+                if (typeof data !== "undefined" && ( data.encryptionKey || parseInt(data.appVersionCode) >= window.Applozic.ALApiService.DEFAULT_ENCRYPTED_APP_VERSION)) {
                     USER_ENCRYPTION_KEY = data.userEncryptionKey;
                 }
 
@@ -7866,11 +7876,10 @@ var MCK_CLIENT_GROUP_MAP = [];
             };
             _this.unsubscibeToNotification = function() {
                 if (stompClient && stompClient.connected) {
-                    if (subscriber) {
-                        subscriber.unsubscribe();
-                    }
+                    subscriber && subscriber.unsubscribe();
+                    encryptedSubscriber && encryptedSubscriber.unsubscribe();
                 }
-                subscriber = null;
+                subscriber = encryptedSubscriber = null;
             };
             _this.subscibeToTypingChannel = function(tabId, isGroup) {
                 var subscribeId = (isGroup) ? tabId : MCK_USER_ID;
@@ -7989,24 +7998,33 @@ var MCK_CLIENT_GROUP_MAP = [];
                     }, MCK_TOKEN + "," + USER_DEVICE_KEY + "," + status);
                 }
             };
-            _this.onConnect = function() {
-                var topic = "/topic/" + (USER_ENCRYPTION_KEY ? "encr-":"") + MCK_TOKEN;
+            _this.onConnect = function () {
                 if (stompClient.connected) {
-                    if (subscriber) {
-                        _this.unsubscibeToNotification();
-                    }
-                    subscriber = stompClient.subscribe(topic, _this.onMessage);
-                    _this.sendStatus(1);
-                    _this.checkConnected(true);
-                    socketStatus = CONNECTED;
+                    (subscriber || encryptedSubscriber) && _this.unsubscibeToNotification();
+                    _this.handleOnConnect();
                 } else {
-                    setTimeout(function() {
-                        subscriber = stompClient.subscribe(topic, _this.onMessage);
-                        _this.sendStatus(1);
-                        _this.checkConnected(true);
+                    setTimeout(function () {
+                        _this.handleOnConnect();
                     }, 5000);
                 }
                 events.onConnect();
+            };
+            _this.handleOnConnect = function () {
+                var topic = "/topic/" + MCK_TOKEN;
+                var encryptedTopic = "/topic/encr-" + MCK_TOKEN;
+                subscriber = stompClient.subscribe(topic, _this.onStompMessage);
+                USER_ENCRYPTION_KEY && (encryptedSubscriber = stompClient.subscribe(encryptedTopic, _this.onStompMessage));
+                _this.sendStatus(1);
+                _this.checkConnected(true);
+            };
+            _this.onStompMessage = function (obj) {
+                var response;
+                if (subscriber != null && subscriber.id === obj.headers.subscription) {
+                    response = obj.body;
+                } else if (encryptedSubscriber != null && encryptedSubscriber.id === obj.headers.subscription) {
+                    response = mckUtils.decrypt(obj.body, USER_ENCRYPTION_KEY);
+                }
+                _this.onMessage(response);
             };
             _this.onOpenGroupMessage = function(obj) {
                 if (openGroupSubscriber.indexOf(obj.headers.subscription) !== -1) {
@@ -8079,11 +8097,9 @@ var MCK_CLIENT_GROUP_MAP = [];
                 }
             };
             _this.onMessage = function(obj) {
-                if (subscriber != null && subscriber.id === obj.headers.subscription) {
+                if (mckUtils.isJsonString(obj)) {
                     $mck_message_inner = mckMessageLayout.getMckMessageInner();
-
-                    var res = mckUtils.decrypt(obj.body, USER_ENCRYPTION_KEY);
-                    var resp = $applozic.parseJSON(res);
+                    var resp = JSON.parse(obj);
                     var messageType = resp.type;
                     typeof resp.message == "object" && $mck_message_inner.data('last-message-received-time', resp.message.createdAtTime);
                     if (messageType === "APPLOZIC_04" || messageType === "MESSAGE_DELIVERED") {

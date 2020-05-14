@@ -178,33 +178,29 @@ function MckUtils() {
         if (!encryptionKey) {
             return data;
         }
-
-        while (data && data.length % 16 != 0) {
-            data += ' ';
-        }
-        var key = aesjs.util.convertStringToBytes(encryptionKey);
-        var aesCtr = new aesjs.ModeOfOperation.ecb(key);
-        var bytes = aesjs.util.convertStringToBytes(data);
-        var encryptedBytes = aesCtr.encrypt(bytes);
-        var encryptedStr = String.fromCharCode.apply(null, encryptedBytes);
-        return btoa(encryptedStr);
+        var key = CryptoJS.enc.Utf8.parse(encryptionKey);
+        var encrypted = CryptoJS.AES.encrypt(data, key, {
+            mode: CryptoJS.mode.ECB,
+            padding: CryptoJS.pad.ZeroPadding
+        });
+        return encrypted.toString();
     },
 
     _this.decrypt = function(data, encryptionKey) {  
         if (!encryptionKey) {
             return data;
         }
-
-        var key = aesjs.util.convertStringToBytes(encryptionKey);
-        var decodedData = atob(data);
-        var arr = [];
-        for (var i = 0; i < decodedData.length; i++) {
-            arr.push(decodedData.charCodeAt(i));
-        }
-        var aesCtr = new aesjs.ModeOfOperation.ecb(key);
-        var decryptedBytes = aesCtr.decrypt(arr);
-        var res = aesjs.util.convertBytesToString(decryptedBytes);
-        return res.replace(/\\u0000/g, '').replace(/^\s*|\s*[\x00-\x10]*$/g, '');
+        var key = CryptoJS.enc.Utf8.parse(encryptionKey);
+        // direct decrypt cipherText
+        var cipherParams = CryptoJS.lib.CipherParams.create({
+            ciphertext: CryptoJS.enc.Base64.parse(data)
+        });
+        var decrypted = CryptoJS.AES.decrypt(cipherParams, key, {
+            mode: CryptoJS.mode.ECB,
+            padding: CryptoJS.pad.ZeroPadding
+        });
+        var response = decrypted.toString(CryptoJS.enc.Utf8);
+        return response.replace(/\\u0000/g, '').replace(/^\s*|\s*[\x00-\x10]*$/g, '');
     },
 
     _this.ajax = function(options) {
@@ -233,7 +229,7 @@ function MckUtils() {
         } catch (e) {
             return false;
         }
-        return true;
+        return isNaN(str);
     };
     /*
     - This is alternative for Jquery deep extend. Refer this link for help https://api.jquery.com/jquery.extend/
@@ -287,7 +283,7 @@ function MckContactUtils() {
         if (contactId) {
             contactId.indexOf('+') === 0 && (contactId = contactId.substring(1));
             contactId = decodeURIComponent(contactId);
-            contactId = contactId.replace(/\@/g, 'AT').replace(/\./g, 'DOT').replace(/\*/g, 'STAR').replace(/\#/g, 'HASH').replace(/\|/g, 'VBAR').replace(/\+/g, 'PLUS').replace(/\;/g, 'SCOLON').replace(/\?/g, 'QMARK').replace(/\,/g, 'COMMA').replace(/\:/g, 'COLON').trim();
+            contactId = contactId.replace(/\%/g, "PERCENTAGE").replace(/\~/g, "TILDE").replace(/\!/g, "EXCLAMATION_MARK").replace(/\*/g, "STAR").replace(/\(/g, "LEFT_PARENTHESIS").replace(/\)/g, "RIGHT_PARENTHESIS").replace(/\-/g, "DASH").replace(/\@/g, "AT").replace(/\./g, "DOT").replace(/\#/g, "HASH").replace(/\|/g, "VBAR").replace(/\+/g, "PLUS").replace(/\;/g, "SCOLON").replace(/\?/g, "QMARK").replace(/\//g,"FORWARDSLASH").trim();
         }
         return contactId;
     };
