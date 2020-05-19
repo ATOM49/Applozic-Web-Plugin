@@ -117,7 +117,7 @@
             ALSocket.connectToSocket(isFetchMessages);
         };
         ALSocket.connectToSocket = function(isFetchMessages) {
-            if (typeof ALSocket.connectToSocket === "function") {
+            if (typeof ALSocket.events.connectToSocket === "function") {
                 ALSocket.events.connectToSocket(isFetchMessages);
             }
         };
