@@ -21,6 +21,7 @@
         ALSocket.MCK_TOKEN;
         ALSocket.USER_DEVICE_KEY;
         ALSocket.USER_ENCRYPTION_KEY;
+        ALSocket.LOGIN_DATA = {};
         var mckUtils = new MckUtils();
         var isReconnectAvailable = true;
 
@@ -67,6 +68,8 @@
                 } else {
                     MCK_WEBSOCKET_PORT = data.websocketPort;
                 }
+                ALSocket.LOGIN_DATA.userName = data.appId || appId;
+                ALSocket.LOGIN_DATA.password = data.authToken;
             }
             ALSocket.events = _events;
             if (typeof MCK_WEBSOCKET_URL !== 'undefined' && navigator.onLine) {
@@ -81,7 +84,7 @@
                     ALSocket.stompClient.onclose = function() {
                         ALSocket.disconnect();
                     };
-                    ALSocket.stompClient.connect("guest", "guest", ALSocket.onConnect, ALSocket.onError, '/');
+                    ALSocket.stompClient.connect(ALSocket.LOGIN_DATA.userName, ALSocket.LOGIN_DATA.password, ALSocket.onConnect, ALSocket.onError, '/');
                     window.addEventListener("beforeunload", function(e) {
                         var check_url;
                         (e.target.activeElement) && (check_url=e.target.activeElement.href);
