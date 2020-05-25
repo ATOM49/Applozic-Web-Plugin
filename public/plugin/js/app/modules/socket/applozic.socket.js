@@ -68,8 +68,8 @@
                 } else {
                     MCK_WEBSOCKET_PORT = data.websocketPort;
                 }
-                ALSocket.LOGIN_DATA.userName = data.appId || appId;
-                ALSocket.LOGIN_DATA.password = data.authToken;
+                ALSocket.LOGIN_DATA.socketUserId = data.appId || appId;
+                ALSocket.LOGIN_DATA.socketPassword = data.authToken;
             }
             ALSocket.events = _events;
             if (typeof MCK_WEBSOCKET_URL !== 'undefined' && navigator.onLine) {
@@ -84,7 +84,7 @@
                     ALSocket.stompClient.onclose = function() {
                         ALSocket.disconnect();
                     };
-                    ALSocket.stompClient.connect(ALSocket.LOGIN_DATA.userName, ALSocket.LOGIN_DATA.password, ALSocket.onConnect, ALSocket.onError, '/');
+                    ALSocket.stompClient.connect(ALSocket.LOGIN_DATA.socketUserId, ALSocket.LOGIN_DATA.socketPassword, ALSocket.onConnect, ALSocket.onError, '/');
                     window.addEventListener("beforeunload", function(e) {
                         var check_url;
                         (e.target.activeElement) && (check_url=e.target.activeElement.href);
