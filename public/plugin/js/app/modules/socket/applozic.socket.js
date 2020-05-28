@@ -21,7 +21,8 @@
         ALSocket.MCK_TOKEN;
         ALSocket.USER_DEVICE_KEY;
         ALSocket.USER_ENCRYPTION_KEY;
-        ALSocket.LOGIN_DATA = {};
+        ALSocket.APP_VERSION_CODE
+        ALSocket.AUTH_TOKEN;
         var mckUtils = new MckUtils();
         var isReconnectAvailable = true;
 
@@ -51,6 +52,7 @@
         window.Applozic.ALSocket.init("applozic-sample-app", "https://apps.applozic.com", events);
         */
         ALSocket.init = function(appId, data, _events) {
+            var LOGIN_DATA = {};
             if (appId) {
                 MCK_APP_ID = appId;
             }
@@ -68,8 +70,9 @@
                 } else {
                     MCK_WEBSOCKET_PORT = data.websocketPort;
                 }
-                ALSocket.LOGIN_DATA.socketUserId = data.appId || appId;
-                ALSocket.LOGIN_DATA.socketPassword = data.authToken;
+                ALSocket.AUTH_TOKEN = data.authToken;
+                LOGIN_DATA.socketUserId = data.appId || appId;
+                LOGIN_DATA.socketPassword = data.authToken;
             }
             ALSocket.events = _events;
             if (typeof MCK_WEBSOCKET_URL !== 'undefined' && navigator.onLine) {
@@ -84,7 +87,7 @@
                     ALSocket.stompClient.onclose = function() {
                         ALSocket.disconnect();
                     };
-                    ALSocket.stompClient.connect(ALSocket.LOGIN_DATA.socketUserId, ALSocket.LOGIN_DATA.socketPassword, ALSocket.onConnect, ALSocket.onError, '/');
+                    ALSocket.stompClient.connect(LOGIN_DATA.socketUserId, LOGIN_DATA.socketPassword, ALSocket.onConnect, ALSocket.onError, '/');
                     window.addEventListener("beforeunload", function(e) {
                         var check_url;
                         (e.target.activeElement) && (check_url=e.target.activeElement.href);
@@ -224,6 +227,7 @@
                 data.userEncryptionKey = ALSocket.USER_ENCRYPTION_KEY;
                 data.websocketUrl = MCK_WEBSOCKET_URL;
                 data.websocketPort = MCK_WEBSOCKET_PORT;
+                data.authToken = ALSocket.AUTH_TOKEN;
                 ALSocket.init(MCK_APP_ID, data, ALSocket.events);
             }
         };
