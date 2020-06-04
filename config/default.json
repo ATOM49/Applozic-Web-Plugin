@@ -1,5 +1,5 @@
 {
   "port": 2299,
   "baseUrl":"https://apps.applozic.com",
-  "applozicMinifiedFileUrl": "https://cdn.applozic.com/applozic/applozic.chat-6.0.min.js"
+  "applozicMinifiedFileUrl": "https://cdn.applozic.com/applozic/applozic.chat-6.1.min.js"
 }
