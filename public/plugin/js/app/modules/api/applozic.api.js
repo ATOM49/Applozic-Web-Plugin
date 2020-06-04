@@ -91,10 +91,11 @@
          * Applozic.ALApiService.connect({data: {alUser: {userId: 'debug4', password: 'debug4', appVersionCode: 111, applicationId: 'applozic-sample-app'}}, success: function(response) {console.log(response);}, error: function() {}});
          */
         ALApiService.connect = function (options) {
+            var appVersionCode = options.data.alUser.appVersionCode || ALApiService.DEFAULT_ENCRYPTED_APP_VERSION
             MCK_APP_ID = options.data.alUser.applicationId;
             MCK_BASE_URL = options.data.baseUrl ? options.data.baseUrl : "https://apps.applozic.com";
             MCK_CUSTOM_UPLOAD_SETTINGS = options.data.alUser.fileupload;
-            options.data.alUser.appVersionCode = options.data.alUser.appVersionCode || ALApiService.DEFAULT_ENCRYPTED_APP_VERSION;
+            options.data.alUser.appVersionCode = appVersionCode;
             ALApiService.ajax({
                 url: MCK_BASE_URL + INITIALIZE_APP_URL,
                 skipEncryption: true,
@@ -113,7 +114,7 @@
                     ALApiService.AUTH_TOKEN = response.authToken;
                     ALApiService.setAjaxHeaders(AUTH_CODE, MCK_APP_ID, response.deviceKey, options.data.alUser.password, options.data.alUser.appModuleName);
                     ALApiService.setEncryptionKeys(response.encryptionKey, response.userEncryptionKey);
-                    response && (response.appVersionCode = ALApiService.DEFAULT_ENCRYPTED_APP_VERSION);
+                    typeof response === "object" && (response.appVersionCode = appVersionCode);
                     if (options.success) {
                         options.success(response);
                     }
