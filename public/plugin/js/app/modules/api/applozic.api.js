@@ -113,7 +113,7 @@
                     ALApiService.AUTH_TOKEN = response.authToken;
                     ALApiService.setAjaxHeaders(AUTH_CODE, MCK_APP_ID, response.deviceKey, options.data.alUser.password, options.data.alUser.appModuleName);
                     ALApiService.setEncryptionKeys(response.encryptionKey, response.userEncryptionKey);
-                    response.appVersionCode = ALApiService.DEFAULT_ENCRYPTED_APP_VERSION;
+                    response && (response.appVersionCode = ALApiService.DEFAULT_ENCRYPTED_APP_VERSION);
                     if (options.success) {
                         options.success(response);
                     }
